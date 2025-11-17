@@ -327,7 +327,7 @@ Create a ROS2 workspace and then clone the repository.
 - Clone repository
 
 ```
-git clone <repo-url> robot_obstacle_avoidance
+git clone https://github.com/AK1902-a11y/Obstacle-Avoidance-and-Navigation-.git
 
 ```
 - Build the workspace
@@ -351,7 +351,6 @@ source install/setup.bash
 Launch the Simulation Environment and Obstacle Avoidance Node 
 
 ```
-# Terminal 1: Launch Gazebo world + robot + obstacle avoidance node
 
 ros2 launch robot_obstacle_avoidance gazebo_sim.launch.py 
 
@@ -359,7 +358,7 @@ ros2 launch robot_obstacle_avoidance gazebo_sim.launch.py
 Launch the Simulation Environment and Obstacle Avoidance Node with tuneable parameters 
 
 ```
-# Override multiple parameters
+
 ros2 launch robot_obstacle_avoidance gazebo_sim.launch.py \
     obstacle_threshold:=0.7 \
     min_safe_distance:=0.5 \
