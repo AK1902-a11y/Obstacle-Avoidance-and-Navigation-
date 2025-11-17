@@ -379,6 +379,8 @@ ros2 launch robot_obstacle_avoidance gazebo_sim.launch.py \
 
 ---
 
+# BONUS POINTS
+
 ## <u>Future Scope and Improvements</u>
 
 ### Advanced Path Planning Pipeline (Partial Implementation)
