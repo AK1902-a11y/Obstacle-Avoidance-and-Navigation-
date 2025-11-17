@@ -1,0 +1,547 @@
+<?xml version="1.0"?>
+<robot name="diff_drive_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Define properties for easy modification -->
+  <xacro:property name="wheel_radius" value="0.1"/>
+  <xacro:property name="wheel_width" value="0.05"/>
+  <xacro:property name="wheel_mass" value="0.5"/>
+  <xacro:property name="body_length" value="0.5"/>
+  <xacro:property name="body_width" value="0.3"/>
+  <xacro:property name="body_height" value="0.15"/>
+  <xacro:property name="body_mass" value="10.0"/>
+  <xacro:property name="wheel_offset_x" value="0.15"/>
+
+  <!-- ==================== MATERIALS (Racing Theme) ==================== -->
+  <material name="racing_black">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+  <material name="racing_red">
+    <color rgba="1 0 0 1"/>
+  </material>
+  <material name="racing_yellow">
+    <color rgba="1.0 0.9 0.0 1.0"/>
+  </material>
+  <material name="glow_orange">
+    <color rgba="1.0 0.5 0.0 1.0"/>
+  </material>
+  <material name="glow_cyan">
+    <color rgba="0.0 0.9 0.9 1.0"/>
+  </material>
+  <material name="glow_red">
+    <color rgba="1.0 0.1 0.1 1.0"/>
+  </material>
+  <material name="energy_shield_blue">
+    <color rgba="0.0 0.5 1.0 0.3"/>
+  </material>
+  <material name="energy_shield_cyan">
+    <color rgba="0.0 1.0 1.0 0.25"/>
+  </material>
+  <material name="wheel_rim_orange">
+    <color rgba="1.0 0.4 0.0 1.0"/>
+  </material>
+
+  <link name="base_footprint"/>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== BODY (Red) ==================== -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+      <material name="racing_red"/> <!-- Change: now racing red -->
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${body_mass}"/>
+      <inertia ixx="0.0625" ixy="0.0" ixz="0.0"
+               iyy="0.1354" iyz="0.0"
+               izz="0.1729"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== RACING STRIPES ==================== -->
+  <link name="racing_stripe_center">
+    <visual>
+      <origin xyz="0 0 0.076" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.48 0.04 0.002"/>
+      </geometry>
+      <material name="racing_yellow"/>
+    </visual>
+  </link>
+  <joint name="stripe_center_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="racing_stripe_center"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="racing_stripe_left">
+    <visual>
+      <origin xyz="0 0.13 0.076" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.45 0.02 0.002"/>
+      </geometry>
+      <material name="glow_cyan"/>
+    </visual>
+  </link>
+  <joint name="stripe_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="racing_stripe_left"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="racing_stripe_right">
+    <visual>
+      <origin xyz="0 -0.13 0.076" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.45 0.02 0.002"/>
+      </geometry>
+      <material name="glow_cyan"/>
+    </visual>
+  </link>
+  <joint name="stripe_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="racing_stripe_right"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== SPOILER ==================== -->
+  <link name="spoiler">
+    <visual>
+      <origin xyz="-0.26 0 0.12" rpy="0 0.2 0"/>
+      <geometry>
+        <box size="0.08 0.35 0.01"/>
+      </geometry>
+      <material name="racing_black"/>
+    </visual>
+  </link>
+  <joint name="spoiler_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="spoiler"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="spoiler_support_left">
+    <visual>
+      <origin xyz="-0.24 0.15 0.085" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.01 0.05"/>
+      </geometry>
+      <material name="racing_black"/>
+    </visual>
+  </link>
+  <joint name="spoiler_support_l_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="spoiler_support_left"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="spoiler_support_right">
+    <visual>
+      <origin xyz="-0.24 -0.15 0.085" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.01 0.05"/>
+      </geometry>
+      <material name="racing_black"/>
+    </visual>
+  </link>
+  <joint name="spoiler_support_r_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="spoiler_support_right"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== ANTENNA (with spinning joint and beacon) ==================== -->
+  <link name="antenna_base">
+    <visual>
+      <origin xyz="0 0 0.09" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.015" length="0.02"/>
+      </geometry>
+      <material name="racing_red"/>
+    </visual>
+  </link>
+  <joint name="antenna_base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="antenna_base"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="antenna_rod">
+    <visual>
+      <origin xyz="0 0 0.11" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.008" length="0.06"/>
+      </geometry>
+      <material name="racing_red"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0"
+               iyy="0.00001" iyz="0.0"
+               izz="0.00001"/>
+    </inertial>
+  </link>
+  <joint name="antenna_spin_joint" type="continuous">
+    <parent link="antenna_base"/>
+    <child link="antenna_rod"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="beacon_light">
+    <visual>
+      <origin xyz="0 0 0.145" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.018"/>
+      </geometry>
+      <material name="glow_orange"/>
+    </visual>
+  </link>
+  <joint name="beacon_joint" type="fixed">
+    <parent link="antenna_rod"/>
+    <child link="beacon_light"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== ENERGY SHIELDS/UNDERGLOW (No change) ==================== -->
+  <!-- Front shield -->
+  <link name="energy_shield_front">
+    <visual>
+      <origin xyz="0.26 0 0.04" rpy="0 0.1 0"/>
+      <geometry>
+        <box size="0.02 0.32 0.18"/>
+      </geometry>
+      <material name="energy_shield_cyan"/>
+    </visual>
+  </link>
+  
+  <joint name="shield_front_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="energy_shield_front"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  
+  <!-- Side shields -->
+  <link name="energy_shield_left">
+    <visual>
+      <origin xyz="0 0.16 0.04" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.48 0.02 0.18"/>
+      </geometry>
+      <material name="energy_shield_blue"/>
+    </visual>
+  </link>
+  
+  <joint name="shield_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="energy_shield_left"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  
+  <link name="energy_shield_right">
+    <visual>
+      <origin xyz="0 -0.16 0.04" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.48 0.02 0.18"/>
+      </geometry>
+      <material name="energy_shield_blue"/>
+    </visual>
+  </link>
+  
+  <joint name="shield_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="energy_shield_right"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== UNDERGLOW LIGHTING ==================== -->
+  
+  <link name="underglow">
+    <visual>
+      <origin xyz="0 0 -0.04" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.45 0.32 0.01"/>
+      </geometry>
+      <material name="glow_cyan"/>
+    </visual>
+  </link>
+  
+  <joint name="underglow_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="underglow"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== WHEELS, RIMS, SENSORS (No change) ==================== -->
+  <!-- Front Left Wheel -->
+  <link name="front_left_wheel">
+    <!-- Main tire (black) -->
+    <visual>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width * 0.7}"/>
+      </geometry>
+      <material name="racing_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${wheel_mass}"/>
+      <inertia ixx="0.00125" ixy="0.0" ixz="0.0"
+               iyy="0.00125" iyz="0.0"
+               izz="0.0025"/>
+    </inertial>
+  </link>
+  
+  <!-- Front Left Rim (orange, glowing) -->
+  <link name="front_left_rim">
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.01"/>
+      </geometry>
+      <material name="wheel_rim_orange"/>
+    </visual>
+  </link>
+  
+  <joint name="front_left_rim_joint" type="fixed">
+    <parent link="front_left_wheel"/>
+    <child link="front_left_rim"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="front_left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="front_left_wheel"/>
+    <origin xyz="${wheel_offset_x} ${body_width/2 + wheel_width/2} 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- Front Right Wheel -->
+  <link name="front_right_wheel">
+    <visual>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width * 0.7}"/>
+      </geometry>
+      <material name="racing_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${wheel_mass}"/>
+      <inertia ixx="0.00125" ixy="0.0" ixz="0.0"
+               iyy="0.00125" iyz="0.0"
+               izz="0.0025"/>
+    </inertial>
+  </link>
+  
+  <link name="front_right_rim">
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.01"/>
+      </geometry>
+      <material name="wheel_rim_orange"/>
+    </visual>
+  </link>
+  
+  <joint name="front_right_rim_joint" type="fixed">
+    <parent link="front_right_wheel"/>
+    <child link="front_right_rim"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="front_right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="front_right_wheel"/>
+    <origin xyz="${wheel_offset_x} -${body_width/2 + wheel_width/2} 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- ==================== REAR WHEELS (With Orange Rims) ==================== -->
+  
+  <!-- Rear Left Wheel -->
+  <link name="rear_left_wheel">
+    <visual>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width * 0.7}"/>
+      </geometry>
+      <material name="racing_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${wheel_mass}"/>
+      <inertia ixx="0.00125" ixy="0.0" ixz="0.0"
+               iyy="0.00125" iyz="0.0"
+               izz="0.0025"/>
+    </inertial>
+  </link>
+  
+  <link name="rear_left_rim">
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.01"/>
+      </geometry>
+      <material name="wheel_rim_orange"/>
+    </visual>
+  </link>
+  
+  <joint name="rear_left_rim_joint" type="fixed">
+    <parent link="rear_left_wheel"/>
+    <child link="rear_left_rim"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="rear_left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_left_wheel"/>
+    <origin xyz="-${wheel_offset_x} ${body_width/2 + wheel_width/2} 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- Rear Right Wheel -->
+  <link name="rear_right_wheel">
+    <visual>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width * 0.7}"/>
+      </geometry>
+      <material name="racing_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${wheel_mass}"/>
+      <inertia ixx="0.00125" ixy="0.0" ixz="0.0"
+               iyy="0.00125" iyz="0.0"
+               izz="0.0025"/>
+    </inertial>
+  </link>
+  
+  <link name="rear_right_rim">
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.01"/>
+      </geometry>
+      <material name="wheel_rim_orange"/>
+    </visual>
+  </link>
+  
+  <joint name="rear_right_rim_joint" type="fixed">
+    <parent link="rear_right_wheel"/>
+    <child link="rear_right_rim"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="rear_right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_right_wheel"/>
+    <origin xyz="-${wheel_offset_x} -${body_width/2 + wheel_width/2} 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- ==================== 2D LiDAR SENSOR (With Glow) ==================== -->
+  
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.04"/>
+      </geometry>
+      <material name="glow_red"/>  <!-- Changed to glowing red -->
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.05" length="0.04"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0"
+               izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0.2 0 0.1" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ==================== CAMERA SENSOR (Same functionality) ==================== -->
+  
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.05 0.02"/>
+      </geometry>
+      <material name="racing_black"/>  <!-- Changed to black -->
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.02 0.05 0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0"
+               izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.22 0 0.12" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_optical_link"/>
+  
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <!-- ==================== RACING NUMBER "42" (Gazebo Only) ==================== -->
+  <gazebo reference="base_link">
+    <visual>
+      <origin xyz="0.24 0 0.12" rpy="0 0 0"/>
+      <geometry>
+        <text>42</text>
+        <font_name>Arial</font_name>
+        <height>0.10</height>
+        <color>1 1 0 1</color>
+        <cast_shadows>false</cast_shadows>
+      </geometry>
+    </visual>
+  </gazebo>
+
+  <!-- ==================== SPINNING PLUGIN ==================== -->
+  <gazebo>
+    <plugin name="antenna_spinner" filename="libgazebo_ros_joint_state_publisher.so">
+      <update_rate>20</update_rate>
+      <joint_name>antenna_spin_joint</joint_name>
+      <publish_tf>false</publish_tf>
+    </plugin>
+  </gazebo>
+
+</robot>

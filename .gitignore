@@ -1,0 +1,14 @@
+# Python cache (package-level)
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
