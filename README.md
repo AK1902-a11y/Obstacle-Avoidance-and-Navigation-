@@ -2,6 +2,7 @@
 
 A ROS2-based reactive obstacle avoidance system featuring autonomous exploration with 360° LiDAR analysis, state-machine decision logic, and robust recovery behaviors for differential drive mobile robots.
 
+**Link to demo video-** [demo video](https://drive.google.com/drive/folders/1z1sHo3CW3rWv_fttVVWuyrxGtIhXPwZr?usp=sharing)
 ---
 
 ## <u>Project Overview</u>
